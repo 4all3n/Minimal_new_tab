@@ -1,4 +1,4 @@
-# GlassOS New Tab ⚡
+# Minimal New Tab ⚡
 
 A glassmorphic Chrome new-tab extension that turns the browser start page into a customizable productivity dashboard. It combines draggable widgets, instant-persist settings, media wallpapers, note and link modals, and a page-wide Pomodoro focus mode.
 
