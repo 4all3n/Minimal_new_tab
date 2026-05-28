@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Minimalist New Tab",
+  "version": "1.0",
+  "description": "A clean, dark-mode custom new tab override page.",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "glassos-newtab@yourdomain.local",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": ["storage", "unlimitedStorage"]
+}

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+
+    <style id="fast-positions"></style>
+    <script>
+      try {
+        const DEFAULT_ICON =
+          'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>';
+        const cachedSettings = localStorage.getItem("fastLoadTab");
+        if (cachedSettings) {
+          const data = JSON.parse(cachedSettings);
+          document.documentElement.style.setProperty(
+            "--blur-amount",
+            `${data.blur}px`,
+          );
+          document.documentElement.style.setProperty(
+            "--card-opacity",
+            data.opacity,
+          );
+          document.documentElement.style.setProperty(
+            "--accent-color",
+            data.accentColor,
+          );
+          document.documentElement.style.setProperty(
+            "--text-color",
+            data.textColor || "#ffffff",
+          );
+          document.documentElement.setAttribute(
+            "data-glass-theme",
+            data.glassTheme || "dark",
+          );
+          if (data.tabTitle) document.title = data.tabTitle;
+
+          let link = document.createElement("link");
+          link.rel = "icon";
+          link.href = data.tabIcon || DEFAULT_ICON;
+          document.head.appendChild(link);
+        }
+        const cachedPos = localStorage.getItem("fastLoadPositions");
+        if (cachedPos) {
+          const pos = JSON.parse(cachedPos);
+          let css = "";
+          for (const id in pos)
+            if (pos[id])
+              css += `#${id} { top: ${pos[id].top}; left: ${pos[id].left}; transform: none; right: auto; bottom: auto; }\n`;
+          document.getElementById("fast-positions").textContent = css;
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="media-background"></div>
+
+    <div id="clock-widget" class="glass-card center-container draggable">
+      <h1 id="greeting">Welcome Back</h1>
+      <div id="digital-clock-container">
+        <div id="digital-clock"></div>
+      </div>
+      <div id="analog-clock" style="display: none">
+        <div class="clock-face">
+          <div class="hand hour-hand" id="hour-hand"></div>
+          <div class="hand minute-hand" id="minute-hand"></div>
+          <div class="hand second-hand" id="second-hand"></div>
+          <div class="center-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pomodoro-widget" class="glass-card draggable">
+      <div class="pomo-header">Focus</div>
+      <div id="pomo-time">25:00</div>
+      <div class="pomo-controls">
+        <button id="pomo-start-btn" class="primary-action-btn">Start</button>
+        <button id="pomo-reset-btn" class="secondary-action-btn">
+          <span class="material-symbols-outlined" style="font-size: 18px"
+            >refresh</span
+          >
+        </button>
+      </div>
+    </div>
+
+    <div id="links-widget" class="glass-card draggable">
+      <div class="notes-header">
+        <span>Quick Links</span>
+        <button id="add-link-btn" class="icon-action-btn">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+      </div>
+      <div id="links-grid"></div>
+    </div>
+
+    <div id="notes-widget" class="glass-card draggable">
+      <div class="notes-header">
+        <span>Notes</span>
+        <button id="add-note-btn" class="icon-action-btn">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+      </div>
+      <div id="notes-list"></div>
+    </div>
+
+    <div id="todo-widget" class="glass-card draggable">
+      <div class="notes-header">Tasks</div>
+      <div class="todo-input-container">
+        <input
+          type="text"
+          id="new-todo-input"
+          class="modern-input"
+          placeholder="Add a task..."
+        />
+        <button id="add-todo-btn" class="primary-action-btn icon-only">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+      </div>
+      <div id="todo-list"></div>
+    </div>
+
+    <button id="settings-btn" class="glass-card icon-btn draggable">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+
+    <div id="note-modal-overlay" class="hidden"></div>
+    <div id="note-modal" class="glass-card hidden">
+      <div class="note-modal-header">
+        <input
+          type="text"
+          id="note-modal-title"
+          placeholder="Note Title..."
+          class="clean-input"
+        />
+        <button id="close-note-modal" class="icon-action-btn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <textarea
+        id="note-modal-text"
+        placeholder="Start typing..."
+        class="clean-input"
+      ></textarea>
+    </div>
+
+    <div id="link-modal-overlay" class="hidden"></div>
+    <div id="link-modal" class="glass-card hidden">
+      <div class="note-modal-header">
+        <span class="link-modal-title">Add Link</span>
+        <button id="close-link-modal" class="icon-action-btn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="link-modal-fields">
+        <input
+          type="text"
+          id="link-name-input"
+          class="modern-input clean-input"
+          placeholder="Link name"
+        />
+        <input
+          type="text"
+          id="link-url-input"
+          class="modern-input clean-input"
+          placeholder="https://..."
+        />
+      </div>
+      <div class="link-modal-actions">
+        <button id="cancel-link-btn" class="secondary-action-btn">Cancel</button>
+        <button id="save-link-btn" class="primary-action-btn">Add Link</button>
+      </div>
+    </div>
+
+    <div id="settings-panel" class="glass-card hidden draggable">
+      <div class="drag-handle">
+        <span class="material-symbols-outlined">drag_indicator</span> Drag to
+        move
+      </div>
+      <div class="settings-scroll-area">
+        <details class="settings-category">
+          <summary>Background & Glass</summary>
+          <div class="category-content">
+            <div class="setting-group">
+              <label>Glass Base Tone</label>
+              <select id="glass-theme-select" class="modern-input">
+                <option value="dark">Deep Dark</option>
+                <option value="light">Frost Light</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label>Media Type</label
+              ><select id="bg-type" class="modern-input">
+                <option value="default">Default Image</option>
+                <option value="file">Upload Local File</option>
+                <option value="url">Web URL (Image/Video)</option>
+                <option value="solid">Solid Color</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label>Wallpaper Fit</label
+              ><select id="bg-cover-style" class="modern-input">
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="fill">Fill</option>
+              </select>
+            </div>
+            <div class="setting-group" id="file-group" style="display: none">
+              <label>Choose File</label
+              ><input type="file" id="bg-file-input" class="modern-input" />
+            </div>
+            <div class="setting-group" id="url-group" style="display: none">
+              <label>Media URL</label
+              ><input
+                type="text"
+                id="bg-url-input"
+                class="modern-input"
+                placeholder="https://..."
+              />
+            </div>
+            <div class="setting-group" id="solid-group" style="display: none">
+              <label>Solid Color</label
+              ><input type="color" id="bg-color-picker" class="modern-color" />
+            </div>
+            <div class="setting-group">
+              <label>Glass Blur</label
+              ><input type="range" id="blur-slider" min="0" max="50" />
+            </div>
+            <div class="setting-group">
+              <label>Glass Transparency</label
+              ><input
+                type="range"
+                id="opacity-slider"
+                min="0"
+                max="1"
+                step="0.05"
+              />
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-category">
+          <summary>Widget Style</summary>
+          <div class="category-content">
+            <div class="setting-group">
+              <label>Text Color</label
+              ><input
+                type="color"
+                id="text-color-picker"
+                class="modern-color"
+                value="#ffffff"
+              />
+            </div>
+            <div class="setting-group">
+              <label>Accent Color</label
+              ><input
+                type="color"
+                id="accent-color-picker"
+                class="modern-color"
+              />
+            </div>
+            <div class="setting-group">
+              <label>Greeting Text</label
+              ><input type="text" id="greeting-input" class="modern-input" />
+            </div>
+            <div class="setting-group">
+              <label>Clock Style</label
+              ><select id="clock-style" class="modern-input">
+                <option value="digital">Digital</option>
+                <option value="analog">Analog</option>
+              </select>
+            </div>
+            <div class="checkbox-group">
+              <label>24-Hour Clock</label
+              ><input type="checkbox" id="clock-format-toggle" />
+            </div>
+            <div class="checkbox-group">
+              <label>Show Seconds</label
+              ><input type="checkbox" id="seconds-toggle" checked />
+            </div>
+            <div class="checkbox-group">
+              <label>Show AM/PM</label
+              ><input type="checkbox" id="ampm-toggle" checked />
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-category" open>
+          <summary>Visibility</summary>
+          <div class="category-content">
+            <div class="checkbox-group">
+              <label>Show Clock</label
+              ><input type="checkbox" id="show-clock-toggle" checked />
+            </div>
+            <div class="checkbox-group">
+              <label>Show Notes</label
+              ><input type="checkbox" id="show-notes-toggle" checked />
+            </div>
+            <div class="checkbox-group">
+              <label>Show Tasks</label
+              ><input type="checkbox" id="show-todo-toggle" checked />
+            </div>
+            <div class="checkbox-group">
+              <label>Show Pomodoro</label
+              ><input type="checkbox" id="show-pomodoro-toggle" checked />
+            </div>
+            <div class="checkbox-group">
+              <label>Show Quick Links</label
+              ><input type="checkbox" id="show-links-toggle" checked />
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-category">
+          <summary>Browser Page</summary>
+          <div class="category-content">
+            <div class="setting-group">
+              <label>Tab Title</label
+              ><input type="text" id="tab-title-input" class="modern-input" />
+            </div>
+            <div class="setting-group">
+              <label>Tab Icon</label
+              ><input
+                type="file"
+                id="tab-icon-input"
+                class="modern-input"
+                accept="image/*"
+              />
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="settings-footer">
+        <button id="reset-layout-btn" class="settings-footer-btn outline">
+          Reset Layout
+        </button>
+        <button id="close-settings-btn" class="settings-footer-btn">
+          Close Settings
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const tmpNow = new Date();
+      document.getElementById("digital-clock").textContent =
+        tmpNow.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    </script>
+    <script src="script.js"></script>
+  </body>
+</html>
